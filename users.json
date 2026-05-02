@@ -1,0 +1,10 @@
+{
+    "accounts": {
+        "Loco": "scrypt:32768:8:1$EYPDztERXcOdStGb$e7523ee8ff41102add626b6511477d8c2510f1016f60161c7673c20f545b6642ccf356e7127f833a8f60169381cadf5c6e18cbc8191d937a39c6aa9fe00432b2",
+        "Queen": "scrypt:32768:8:1$rQTN4EsnBQDuZ8c9$dfe95a7928cb377f03ce8b378ea47a94fc199b9cfd5186febb6df9e61a597ab722fb6e6e8d65ef74d29a9ce4ca32420e9b355b220f5c3ec233d96cf46ed3b0bc"
+    },
+    "leaderboard": {
+        "Loco": 180,
+        "Queen": 160
+    }
+}
