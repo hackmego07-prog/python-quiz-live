@@ -30,7 +30,7 @@
   {"question": "Python: Which operator is used for power (exponent)?", "options": ["^", "**", "*", "//"], "ans": "**"},
   {"question": "HTML: What is the correct tag for a clickable button?", "options": ["<input type='click'>", "<button>", "<click>", "<press>"], "ans": "<button>"},
   {"question": "CSS: Which property changes the font of an element?", "options": ["font-family", "font-style", "text-font", "type-face"], "ans": "font-family"},
-,{"question": "Dev: What does a 'Full Stack' developer do?", "options": ["Only designs logos", "Both Frontend and Backend", "Fixes hardware", "Manages office internet"], "ans": "Both Frontend and Backend"},
+ {"question": "Dev: What does a 'Full Stack' developer do?", "options": ["Only designs logos", "Both Frontend and Backend", "Fixes hardware", "Manages office internet"], "ans": "Both Frontend and Backend"},
 {"question": "Cyber: What is 'Social Engineering' in hacking?", "options": ["Fixing a broken PC", "Manipulating people to give up passwords", "Writing code in Python", "Building a website"], "ans": "Manipulating people to give up passwords"},
 {"question": "Data: What is the main difference between a List and a Tuple in Python?", "options": ["Tuples cannot be changed (immutable)", "Lists are faster", "Tuples use #", "There is no difference"], "ans": "Tuples cannot be changed (immutable)"},
 {"question": "App: What is 'GitHub' primarily used for?", "options": ["Editing photos", "Version control and collaboration", "Sending emails", "Hosting video calls"], "ans": "Version control and collaboration"},
