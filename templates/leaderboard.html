@@ -15,10 +15,9 @@
     </style>
 </head>
 <body>
-
 <div class="card">
     <h1>🏆 Global Rankings</h1>
-           <table>
+    <table>
         <thead>
             <tr>
                 <th>Rank</th>
@@ -27,21 +26,21 @@
             </tr>
         </thead>
         <tbody>
-            {% for name, score in leaderboard %}
+            {% for name, score in rankers %}
             <tr>
                 <td class="rank">#{{ loop.index }}</td>
                 <td>{{ name }}</td>
                 <td class="score">{{ score }}</td>
             </tr>
             {% else %}
-            <tr><td colspan="3">No scores yet!</td></tr>
+            <tr>
+                <td colspan="3">No scores yet! Be the first!</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
-  
-      <a href="/quiz" class="btn">Play Again 🔄</a>
+
+    <a href="/quiz" class="btn">Play Again</a>
     <a href="/logout" style="display:block; margin-top:15px; color:#95a5a6; text-decoration:none;">Logout</a>
 </div>
-
 </body>
-</html>
