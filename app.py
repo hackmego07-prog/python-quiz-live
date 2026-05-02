@@ -1,11 +1,17 @@
 import json
 import os
 import random
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# 1. Create the App FIRST
 app = Flask(__name__)
-app.secret_key = 'kairox_ultra_secret'
+app.secret_key = 'python_qote_live'
+
+# 2. Now you can add the Sitemap route
+@app.route('/sitemap.xml')
+def static_from_root():
+    return send_from_directory('.', 'sitemap.xml')
 
 # --- FILE PATHS ---
 USER_DATA = 'users.json'
