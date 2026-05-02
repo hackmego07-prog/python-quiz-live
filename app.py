@@ -105,11 +105,17 @@ def save_score():
 @app.route('/leaderboard')
 def leaderboard():
     data = load_users()
-    # This takes the scores and sorts them: Highest first
-    # data['leaderboard'] looks like {"Loco": 40, "Admin": 50}
-    sorted_scores = sorted(data['leaderboard'].items(), key=lambda x: x[1], reverse=True)
-    return render_template('leaderboard.html', leaderboard=sorted_scores)
-
+    # 1. Get the leaderboard dictionary from your users.json
+    leaderboard_data = data.get("leaderboard", {})
+    
+    # 2. Sort users by score (highest to lowest)
+    # This turns the dictionary into a list of tuples: [('username', score), ...]
+    sorted_rankers = sorted(leaderboard_data.items(), key=lambda x: x[1], reverse=True)
+    
+    # 3. Take only the TOP 20
+    top_20 = sorted_rankers[:20]
+    
+    return render_template('leaderboard.html', rankers=top_20)
 
 @app.route('/logout')
 def logout():
