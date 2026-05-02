@@ -12,7 +12,24 @@
         .rank { font-weight: bold; color: #3498db; }
         .score { text-align: right; font-weight: bold; color: #2ecc71; }
         .btn { display: block; width: 100%; padding: 15px; margin-top: 20px; background: #3498db; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; }
-    </style>
+   
+  /* This creates the scrollable window */
+  .leaderboard-scroll {
+      max-height: 450px; 
+      overflow-y: auto;
+      margin-top: 20px;
+      padding-right: 5px;
+  }
+  /* Optional: Makes the scrollbar look slim */
+  .leaderboard-scroll::-webkit-scrollbar {
+      width: 4px;
+  }
+  .leaderboard-scroll::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 10px;
+  }
+  
+   </style>
 </head>
 <body>
 <div class="card">
