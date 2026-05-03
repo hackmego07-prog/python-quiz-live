@@ -45,26 +45,6 @@ def quiz():
     if 'user' not in session: return redirect(url_for('login'))
     return render_template('quiz.html')
 
-@app.route('/get_questions')
-def get_questions():
-    all_qs = load_json(QUESTION_DATA, [])
-    return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
-
-@app.route('/get_questions')
-def get_questions():
-    # This matches the 'fetch' call in your quiz.html
-    all_qs = load_json(QUESTION_DATA, [])
-    if not all_qs:
-        return jsonify([])
-    # Sends 10 random questions to the frontend
-    return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
-
-
-@app.route('/get_questions')
-def get_questions():
-    all_qs = load_json(QUESTION_DATA, [])
-    return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
-
 @app.route('/api/leaderboard')
 def api_leaderboard():
     data = load_json(USER_DATA, {"leaderboard": {}})
@@ -102,7 +82,6 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# --- ADD THIS CODE HERE ---
 @app.route('/get_questions')
 def get_questions():
     import random
