@@ -36,6 +36,15 @@ def index():
         return redirect(url_for('quiz'))
     return redirect(url_for('login'))
 
+@app.route('/api/leaderboard')
+def api_leaderboard():
+    data = load_users()
+    lb = data.get("leaderboard", {})
+    # Sort and take top 20 just like your main leaderboard
+    sorted_lb = sorted(lb.items(), key=lambda x: x[1], reverse=True)[:20]
+    return jsonify(sorted_lb)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
