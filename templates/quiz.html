@@ -1,258 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <title>Python Quiz</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Infinity Quiz</title>
     <style>
-        :root {
-            --primary: #3498db;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --bg: #f4f7f6;
-            --dark: #2c3e50;
-        }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); 
-            display: flex; 
-            justify-content: center; 
-            padding: 20px; 
-            margin: 0;
-        }
+        :root { --primary: #3498db; --success: #2ecc71; --dark: #2c3e50; }
+        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        
+        /* 1. This pushes the box down to clear the stats header */
         #quiz-box { 
+            margin-top: 80px; 
             background: white; 
             padding: 25px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            width: 100%; 
-            max-width: 500px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            border-bottom: 2px solid #f0f0f0; 
-            padding-bottom: 15px; 
-            margin-bottom: 20px; 
-        }
-        .user-info { font-weight: bold; color: var(--primary); }
-        .stats { font-size: 0.9rem; color: #7f8c8d; }
-        
-        #question-text { font-size: 1.2rem; color: var(--dark); margin-bottom: 20px; min-height: 3em; }
-        
-        .option-btn { 
-            display: block; 
-            width: 100%; 
-            padding: 15px; 
-            margin: 10px 0; 
-            border: 2px solid #eee; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            background: white; 
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            text-align: left;
-            outline: none;
-        }
-        .option-btn:hover { border-color: var(--primary); background: #fcfcfc; }
-        .option-btn:disabled { cursor: not-allowed; opacity: 0.8; }
 
-        .final-card { text-align: center; padding: 20px 0; }
-        .score-big { font-size: 4rem; font-weight: bold; color: var(--success); margin: 10px 0; }
+        .header { display: flex; justify-content: space-between; position: fixed; top: 0; left: 0; width: 100%; background: white; padding: 15px 20px; box-sizing: border-box; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        .nav-btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 1rem;
+        /* 2. Moves trophy down so it doesn't block the score */
+        #leaderboard-icon { 
+            position: fixed; top: 85px; right: 15px; z-index: 1000; 
+            background: white; padding: 10px; border-radius: 50%; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.2rem;
         }
+
+        .btn { display: block; width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; color: white; background: var(--primary); }
+        
+        /* Modal Styles */
+        #rankModal { display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+        .modal-card { margin: 15% auto; width: 90%; max-width: 350px; background: white; padding: 20px; border-radius: 15px; position: relative; }
+        .leaderboard-scroll { max-height: 300px; overflow-y: auto; margin-top: 15px; }
     </style>
 </head>
 <body>
-<div id="leaderboard-icon" onclick="openRankModal()" style="position: fixed; top: 70px; right: 15px; z-index: 1000; background: white; padding: 10px; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.2rem;">
-    🏆
-</div>
-
-<div id="rankModal" style="display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
-    <div class="card" style="margin: 10% auto; width: 90%; max-width: 380px; position: relative; padding: 20px; border-radius: 15px; background: white;">
-        <span onclick="closeModal()" style="position: absolute; right: 15px; top: 10px; font-size: 30px; cursor: pointer; color: #7f8c8d;">&times;</span>
-        <h2 style="margin-top: 0;">Top 20 Global Rankers</h2>
-        <div id="modal-list" class="leaderboard-scroll" style="max-height: 400px; overflow-y: auto;">
-            <p>Loading the latest scores...</p>
-        </div>
-    </div>
-</div>
-
-<div id="quiz-box">
     <div class="header">
-        <div class="user-info">👤 {{ username }}</div>
-        <div class="stats">
-            Q: <span id="q-count">0</span>/10 | 
-            Score: <span id="score-val"
+        <div class="user-info">👤 {{ session['user'] }}</div>
+        <div class="stats">Q: <span id="q-count">0</span>/10 | Score: <span id="score-val" style="color:var(--success)">0</span></div>
+    </div>
 
-   <body>
-    <div id="leaderboard-icon" onclick="openModal()">🏆</div>
-    
+    <div id="leaderboard-icon" onclick="openRankModal()">🏆</div>
+
     <div id="quiz-box">
-        </div>
-</body>
-
-
-/* Position the trophy so it doesn't block the score */
-#leaderboard-icon {
-    top: 80px !important; 
-    right: 10px !important;
-}
-
-
- style="color: var(--success);">0</span>
+        <div id="game-ui">
+            <h3 id="question-text">Loading...</h3>
+            <div id="options-container"></div>
         </div>
     </div>
-    
-    <div id="game-ui">
-        <h3 id="question-text">Loading the challenge...</h3>
-        <div id="options"></div>
+
+    <div id="rankModal">
+        <div class="modal-card">
+            <span onclick="closeRankModal()" style="position: absolute; right: 15px; top: 10px; font-size: 25px; cursor: pointer;">&times;</span>
+            <h2 style="margin-top:0">Top 20 Rankers</h2>
+            <div id="modal-content" class="leaderboard-scroll"></div>
+        </div>
     </div>
-</div>
 
-<script>
-     function openModal() {
-    document.getElementById("rankModal").style.display = "block";
-    
-    // This fetches the top 20 list from the Python server we set up
-    fetch('/api/leaderboard')
-        .then(response => response.json())
-        .then(data => {
-            let html = '<table style="width:100%; border-collapse: collapse;">';
-            html += '<thead><tr><th style="text-align:left;">Rank</th><th style="text-align:left;">Player</th><th style="text-align:right;">Points</th></tr></thead><tbody>';
-            data.forEach((player, index) => {
-                html += `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px 0;">#${index + 1}</td><td>${player[0]}</td><td style="text-align:right; font-weight:bold; color:#2ecc71;">${player[1]}</td></tr>`;
-            });
-            html += '</tbody></table>';
-            document.getElementById("modal-list").innerHTML = html;
-        })
-        .catch(err => {
-            document.getElementById("modal-list").innerHTML = "Error loading rankings.";
-        });
-}
-
-function closeModal() {
-    document.getElementById("rankModal").style.display = "none";
-}
-
-    // 1. RECEIVE RANDOM 10 QUESTIONS FROM FLASK
-    const questions = {{ questions|tojson }};
-    let currentIndex = 0;
-    let totalScore = 0;
-
-    const questionText = document.getElementById('question-text');
-    const optionsDiv = document.getElementById('options');
-    const qCount = document.getElementById('q-count');
-    const scoreVal = document.getElementById('score-val');
-
-    // 2. LOAD THE CURRENT QUESTION
-    function loadQuestion() {
-        if (currentIndex >= questions.length) {
-            finishQuiz();
-            return;
-        }
-
-        const qData = questions[currentIndex];
-        
-        // Update Stats
-        qCount.innerText = (currentIndex + 1);
-        scoreVal.innerText = totalScore;
-        
-        // Set Question Text
-        questionText.innerText = qData.question;
-        
-        // Clear old options and Shuffle current ones
-        optionsDiv.innerHTML = '';
-        let shuffledOptions = [...qData.options].sort(() => Math.random() - 0.5);
-
-        shuffledOptions.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            btn.onclick = () => checkAnswer(btn, opt, qData.ans);
-            optionsDiv.appendChild(btn);
-        });
-    }
-
-    // 3. LOGIC FOR CLICKING AN ANSWER
-    function checkAnswer(selectedBtn, choice, correct) {
-        const allButtons = document.querySelectorAll('.option-btn');
-        allButtons.forEach(b => b.disabled = true); // Stop multiple clicks
-
-        if (choice === correct) {
-            selectedBtn.style.background = "var(--success)";
-            selectedBtn.style.color = "white";
-            selectedBtn.style.borderColor = "var(--success)";
-            totalScore += 10;
-        } else {
-            selectedBtn.style.background = "var(--danger)";
-            selectedBtn.style.color = "white";
-            selectedBtn.style.borderColor = "var(--danger)";
-            
-            // Highlight the correct answer so user learns
-            allButtons.forEach(b => {
-                if(b.innerText === correct) {
-                    b.style.borderColor = "var(--success)";
-                    b.style.borderWidth = "3px";
-                }
+    <script>
+        let totalScore = 0;
+        // Logic for opening the trophy menu
+        function openRankModal() {
+            document.getElementById("rankModal").style.display = "block";
+            fetch('/api/leaderboard').then(res => res.json()).then(data => {
+                let table = '<table style="width:100%">';
+                data.forEach((p, i) => {
+                    table += `<tr><td>#${i+1}</td><td>${p[0]}</td><td style="text-align:right"><b>${p[1]}</b></td></tr>`;
+                });
+                document.getElementById("modal-content").innerHTML = table + '</table>';
             });
         }
+        function closeRankModal() { document.getElementById("rankModal").style.display = "none"; }
 
-        // Wait 1.5 seconds before next question
-        setTimeout(() => {
-            currentIndex++;
-            loadQuestion();
-        }, 1500);
-    }
-
-    // 4. END GAME AND SAVE TO DATABASE
-    async function finishQuiz() {
-        // Save score to Flask via the /save_score route
-        await fetch('/save_score', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ score: totalScore })
-        });
-
-        // Show Final UI
-        document.getElementById('quiz-box').innerHTML = `
-            <div class="final-card">
-                <h1 style="color: var(--dark);">Quiz Finished!</h1>
-                <p>You earned ⚡</p>
-<div class="score-big">+ ${totalScore} Points</div>
-<p style="font-size: 0.9rem; color: #7f8c8d;">Added to your Global Ranking!</p>
-
-                
-                <button onclick="window.location.href='/leaderboard'" class="nav-btn" style="background: var(--success);">
-                    View Global Rankings 🏆
-                </button>
-                
-                <button onclick="location.reload()" class="nav-btn" style="background: var(--primary);">
-                    Try 10 New Questions 🔄
-                </button>
-                
-                <a href="/logout" style="display:block; margin-top:20px; color:#95a5a6; text-decoration:none; font-size:0.8rem;">Change Account</a>
-            </div>
-        `;
-    }
-
-    // Initialize
-    loadQuestion();
-</script>
-
+        // 3. Perfect center alignment for the finish screen
+        function finishQuiz() {
+            document.getElementById('quiz-box').innerHTML = `
+                <div style="text-align: center;">
+                    <h1>Quiz Finished!</h1>
+                    <p>You earned ⚡</p>
+                    <div style="font-size: 3rem; color: var(--success); font-weight: bold; margin: 10px 0;">+ ${totalScore} Points</div>
+                    <button onclick="window.location.href='/leaderboard'" class="btn" style="background: var(--success);">View Global Rankings 🏆</button>
+                    <button onclick="location.reload()" class="btn">Try 10 New Questions 🔄</button>
+                </div>`;
+        }
+    </script>
 </body>
-  </html>
+</html>
+
   
