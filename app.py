@@ -50,6 +50,19 @@ def get_questions():
     all_qs = load_json(QUESTION_DATA, [])
     return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
 
+@app.route('/get_questions')
+def get_questions():
+    all_qs = load_json(QUESTION_DATA, [])
+    return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
+
+@app.route('/api/leaderboard')
+def api_leaderboard():
+    data = load_json(USER_DATA, {"leaderboard": {}})
+    lb = data.get("leaderboard", {})
+    sorted_lb = sorted(lb.items(), key=lambda x: x[1], reverse=True)[:20]
+    return jsonify(sorted_lb)
+
+
 @app.route('/update_score', methods=['POST'])
 def update_score():
     if 'user' not in session: return jsonify({"status": "error"})
