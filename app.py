@@ -85,7 +85,7 @@ def logout():
 @app.route('/get_questions')
 def get_questions():
     import random
-    all_qs = load_json('questions.json', [])
+    all_qs = load_json(QUESTION_DATA, [])
     if not all_qs:
         return jsonify([])
     return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
