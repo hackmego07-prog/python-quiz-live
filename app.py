@@ -1,54 +1,114 @@
-import os
 import json
+import os
 import random
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'kairox_secret_key'
+app.secret_key = 'kairox_ultra_secret'
 
-# Updated path logic for Render
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-QUESTION_DATA = os.path.join(BASE_DIR, 'questions.json')
-USER_DATA = os.path.join(BASE_DIR, 'users.json')
+# --- FILE PATHS ---
+USER_DATA = 'users.json'
+QUESTION_DATA = 'questions.json'
 
-def load_json(file_path):
-    try:
-        if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        return []
-    except Exception as e:
-        print(f"Error loading {file_path}: {e}")
-        return []
+# --- DATABASE HELPERS ---
+def load_users():
+    if not os.path.exists(USER_DATA):
+        return {"accounts": {}, "leaderboard": {}}
+    with open(USER_DATA, 'r') as f:
+        return json.load(f)
+
+def save_users(data):
+    with open(USER_DATA, 'w') as f:
+        json.dump(data, f, indent=4)
+
+# --- ROUTES ---
 
 @app.route('/')
 def index():
+    if 'user' in session:
+        return redirect(url_for('quiz'))
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        if not username:
-            return "Username is required", 400
-        session['user'] = username
-        return redirect(url_for('quiz'))
+        name = request.form.get('username').strip()
+        pw = request.form.get('password').strip()
+        data = load_users()
+
+        # 1. CHECK IF USER EXISTS
+        if name in data['accounts']:
+            # Verify Password
+            if check_password_hash(data['accounts'][name], pw):
+                session['user'] = name
+                return redirect(url_for('quiz'))
+            else:
+                return "Incorrect Password! Go back and try again.", 401
+        
+        # 2. CREATE NEW USER IF NOT FOUND
+        else:
+            data['accounts'][name] = generate_password_hash(pw)
+            save_users(data)
+            session['user'] = name
+            return redirect(url_for('quiz'))
+
     return render_template('login.html')
 
 @app.route('/quiz')
 def quiz():
     if 'user' not in session:
         return redirect(url_for('login'))
-    return render_template('quiz.html')
+    
+    # LOAD YOUR EXISTING QUESTIONS
+    try:
+        with open(QUESTION_DATA, 'r') as f:
+            all_q = json.load(f)
+        
+        # PICK 10 RANDOM ONES (or all if less than 10)
+        num_to_pick = min(len(all_q), 10)
+        selected_q = random.sample(all_q, num_to_pick)
+        
+        return render_template('quiz.html', questions=selected_q, username=session['user'])
+    except Exception as e:
+        return f"Error loading questions.json: {e}"
 
-@app.route('/get_questions')
-def get_questions():
-    all_qs = load_json(QUESTION_DATA)
-    if not all_qs:
-        return jsonify([])
-    # Pick 10 random questions
-    selected = random.sample(all_qs, min(len(all_qs), 10))
-    return jsonify(selected)
+@app.route('/save_score', methods=['POST'])
+def save_score():
+    if 'user' not in session:
+        return jsonify({"status": "error"}), 403
+    
+    score = request.get_json().get('score')
+    name = session['user']
+    data = load_users()
+
+        # 1. Get the points from the round just finished
+    new_points = request.get_json().get('score')
+    name = session['user']
+    data = load_users()
+
+    # 2. Add these points to their lifetime total
+    # If they are new, they start at 0
+    current_total = data['leaderboard'].get(name, 0)
+    data['leaderboard'][name] = current_total + new_points
+    
+    # 3. Save the updated total back to the file
+    save_users(data)
+    return jsonify({"status": "success"})
+
+@app.route('/leaderboard')
+def leaderboard():
+    data = load_users()
+    # This takes the scores and sorts them: Highest first
+    # data['leaderboard'] looks like {"Loco": 40, "Admin": 50}
+    sorted_scores = sorted(data['leaderboard'].items(), key=lambda x: x[1], reverse=True)
+    return render_template('leaderboard.html', leaderboard=sorted_scores)
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
