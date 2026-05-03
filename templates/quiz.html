@@ -107,6 +107,30 @@
 </div>
 
 <script>
+     function openModal() {
+    document.getElementById("rankModal").style.display = "block";
+    
+    // This fetches the top 20 list from the Python server we set up
+    fetch('/api/leaderboard')
+        .then(response => response.json())
+        .then(data => {
+            let html = '<table style="width:100%; border-collapse: collapse;">';
+            html += '<thead><tr><th style="text-align:left;">Rank</th><th style="text-align:left;">Player</th><th style="text-align:right;">Points</th></tr></thead><tbody>';
+            data.forEach((player, index) => {
+                html += `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px 0;">#${index + 1}</td><td>${player[0]}</td><td style="text-align:right; font-weight:bold; color:#2ecc71;">${player[1]}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById("modal-list").innerHTML = html;
+        })
+        .catch(err => {
+            document.getElementById("modal-list").innerHTML = "Error loading rankings.";
+        });
+}
+
+function closeModal() {
+    document.getElementById("rankModal").style.display = "none";
+}
+
     // 1. RECEIVE RANDOM 10 QUESTIONS FROM FLASK
     const questions = {{ questions|tojson }};
     let currentIndex = 0;
