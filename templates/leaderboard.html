@@ -1,70 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Global Rankings - Kai.pycourse</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Rankings</title>
     <style>
-        :root { --primary: #3498db; --success: #2ecc71; --dark: #2c3e50; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        
-        .card { 
-            background: white; padding: 30px; border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; 
-            max-width: 400px; text-align: center; margin-top: 20px;
-        }
-
-        h1 { color: var(--dark); margin-bottom: 25px; font-size: 1.8rem; }
-
-        .leaderboard-scroll { 
-            max-height: 450px; overflow-y: auto; margin-bottom: 20px; 
-            border-radius: 10px; background: #fff;
-        }
-
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { padding: 12px; color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #f4f7f6; }
-        td { padding: 15px 12px; border-bottom: 1px solid #f4f7f6; font-size: 1rem; }
-
-        .rank-col { font-weight: bold; color: var(--primary); width: 50px; }
-        .score-col { text-align: right; font-weight: bold; color: var(--success); }
-
-        /* Perfect Centering for the Button */
-        .btn { 
-            display: block; width: 100%; max-width: 280px; 
-            margin: 20px auto 0; padding: 16px; 
-            background: var(--primary); color: white; 
-            text-decoration: none; border-radius: 12px; 
-            font-weight: bold; transition: 0.3s; 
-        }
-        
-        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
+        .rank { font-weight: bold; color: #3498db; }
+        .score { text-align: right; font-weight: bold; color: #2ecc71; }
+        .btn { display: block; width: 100%; padding: 15px; margin-top: 20px; background: #3498db; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>🏆 Top 20 Players</h1>
-        
-        <div class="leaderboard-scroll">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Player</th>
-                        <th style="text-align:right">Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for name, score in rankers %}
-                    <tr>
-                        <td class="rank-col">#{{ loop.index }}</td>
-                        <td style="color: var(--dark);">{{ name }}</td>
-                        <td class="score-col">{{ score }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
 
-        <a href="/quiz" class="btn">Play Again 🔄</a>
-    </div>
+<div class="card">
+    <h1>🏆 Global Rankings</h1>
+           <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th style="text-align: right;">Total Points ⚡</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for name, score in leaderboard %}
+            <tr>
+                <td class="rank">#{{ loop.index }}</td>
+                <td>{{ name }}</td>
+                <td class="score">{{ score }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">No scores yet!</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  
+      <a href="/quiz" class="btn">Play Again 🔄</a>
+    <a href="/logout" style="display:block; margin-top:15px; color:#95a5a6; text-decoration:none;">Logout</a>
+</div>
+
 </body>
 </html>
