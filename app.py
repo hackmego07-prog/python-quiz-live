@@ -21,21 +21,15 @@ def load_json(file_path, default):
 
 @app.route('/get_questions')
 def get_questions():
-    try:
-        # Load questions safely
-        all_qs = load_json(QUESTION_DATA, [])
+    import random
+    all_qs = load_json('questions.json', [])
+    
+    if not all_qs:
+        return jsonify([])
         
-        # If file is empty or missing, return an empty list instead of crashing
-        if not all_qs or len(all_qs) == 0:
-            return jsonify([])
-            
-        # Select 10 questions (or fewer if total is less than 10)
-        count = min(len(all_qs), 10)
-        selected = random.sample(all_qs, count)
-        return jsonify(selected)
-    except Exception as e:
-        print(f"Error: {e}")
-        return jsonify([]) # Prevents the red error in your logs
+    count = min(len(all_qs), 10)
+    return jsonify(random.sample(all_qs, count))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
