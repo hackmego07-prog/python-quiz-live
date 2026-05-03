@@ -4,23 +4,22 @@ import random
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+app.secret_key = 'kairox_secret_key'
 
-QUESTION_DATA = 'questions.json'
-USER_DATA = 'users.json'
+# Updated path logic for Render
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+QUESTION_DATA = os.path.join(BASE_DIR, 'questions.json')
+USER_DATA = os.path.join(BASE_DIR, 'users.json')
 
-def load_json(file_path, default):
-    if not os.path.exists(file_path):
-        return default
+def load_json(file_path):
     try:
-        with open(file_path, 'r') as f:
-            return json.load(f)
-    except:
-        return default
-
-def save_json(file_path, data):
-    with open(file_path, 'w') as f:
-        json.dump(data, f, indent=4)
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return []
+    except Exception as e:
+        print(f"Error loading {file_path}: {e}")
+        return []
 
 @app.route('/')
 def index():
@@ -29,14 +28,10 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username').strip()
+        username = request.form.get('username', '').strip()
         if not username:
-            return "Name required"
+            return "Username is required", 400
         session['user'] = username
-        data = load_json(USER_DATA, {"leaderboard": {}})
-        if username not in data['leaderboard']:
-            data['leaderboard'][username] = 0
-            save_json(USER_DATA, data)
         return redirect(url_for('quiz'))
     return render_template('login.html')
 
@@ -48,41 +43,12 @@ def quiz():
 
 @app.route('/get_questions')
 def get_questions():
-    all_qs = load_json(QUESTION_DATA, [])
+    all_qs = load_json(QUESTION_DATA)
     if not all_qs:
         return jsonify([])
-    count = min(len(all_qs), 10)
-    return jsonify(random.sample(all_qs, count))
-
-@app.route('/update_score', methods=['POST'])
-def update_score():
-    if 'user' not in session:
-        return jsonify({"status": "error"}), 403
-    points = request.json.get('points', 0)
-    data = load_json(USER_DATA, {"leaderboard": {}})
-    current_user = session['user']
-    data['leaderboard'][current_user] = data['leaderboard'].get(current_user, 0) + points
-    save_json(USER_DATA, data)
-    return jsonify({"status": "success"})
-
-@app.route('/leaderboard')
-def leaderboard():
-    data = load_json(USER_DATA, {"leaderboard": {}})
-    lb = data.get("leaderboard", {})
-    sorted_lb = sorted(lb.items(), key=lambda x: x[1], reverse=True)[:20]
-    return render_template('leaderboard.html', rankers=sorted_lb)
-
-@app.route('/api/leaderboard')
-def api_leaderboard():
-    data = load_json(USER_DATA, {"leaderboard": {}})
-    lb = data.get("leaderboard", {})
-    sorted_lb = sorted(lb.items(), key=lambda x: x[1], reverse=True)[:20]
-    return jsonify(sorted_lb)
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
+    # Pick 10 random questions
+    selected = random.sample(all_qs, min(len(all_qs), 10))
+    return jsonify(selected)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
