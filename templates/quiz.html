@@ -4,20 +4,23 @@
     <title>Kai.pycourse - Quiz</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root { --primary: #3498db; --success: #2ecc71; --error: #e74c3c; --dark: #2c3e50; }
+        :root { --primary: #3498db; --success: #2ecc71; --dark: #2c3e50; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 15px; }
         
+        /* 1. Header Stats Fixed at Top */
         .header { display: flex; justify-content: space-between; position: fixed; top: 0; left: 0; width: 100%; background: white; padding: 15px 20px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); box-sizing: border-box; }
         
+        /* 2. Push Question Box down to see Score clearly */
         #quiz-box { 
-            margin-top: 90px; /* Space for the header */
+            margin-top: 100px; 
             background: white; padding: 25px; border-radius: 20px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 450px; 
             margin-left: auto; margin-right: auto; text-align: center;
         }
 
+        /* 3. Trophy Menu Icon below Header */
         #leaderboard-icon { 
-            position: fixed; top: 95px; right: 20px; z-index: 1001; 
+            position: fixed; top: 105px; right: 20px; z-index: 1001; 
             background: white; padding: 12px; border-radius: 50%; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.4rem;
         }
@@ -27,18 +30,19 @@
             border: 2px solid #eee; border-radius: 12px; background: white; 
             font-size: 1rem; cursor: pointer; transition: 0.3s; 
         }
-        .option-btn:hover { border-color: var(--primary); background: #f0f8ff; }
 
+        /* 4. Perfect Middle Centering for Buttons */
         .btn { 
             display: block; width: 100%; padding: 18px; margin-top: 15px; 
             border: none; border-radius: 12px; font-weight: bold; 
-            font-size: 1.1rem; color: white; cursor: pointer; 
+            font-size: 1.1rem; color: white; cursor: pointer; text-align: center;
+            text-decoration: none; box-sizing: border-box;
         }
 
-        /* Modal / Pop-up Styles */
+        /* Modal Styles */
         #rankModal { display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
         .modal-card { margin: 15% auto; width: 85%; max-width: 360px; background: white; padding: 25px; border-radius: 20px; position: relative; }
-        .leaderboard-scroll { max-height: 350px; overflow-y: auto; margin-top: 20px; }
+        .leaderboard-scroll { max-height: 350px; overflow-y: auto; margin-top: 20px; border-radius: 10px; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 5px; border-bottom: 1px solid #eee; text-align: left; }
     </style>
@@ -72,9 +76,11 @@
         let totalScore = 0;
 
         async function loadQuiz() {
-            const res = await fetch('/get_questions');
-            questions = await res.json();
-            showQuestion();
+            try {
+                const res = await fetch('/get_questions');
+                questions = await res.json();
+                showQuestion();
+            } catch (err) { document.getElementById('question-text').innerText = "Error loading quiz."; }
         }
 
         function showQuestion() {
@@ -115,19 +121,24 @@
                 body: JSON.stringify({points: totalScore})
             });
             
+            // This centers both buttons exactly in the middle
             document.getElementById('quiz-box').innerHTML = `
-                <h1 style="color: var(--dark);">Quiz Finished!</h1>
+                <h1 style="color: var(--dark); margin-top: 0;">Quiz Finished!</h1>
                 <p>You earned</p>
                 <div style="font-size: 3.5rem; font-weight: bold; color: var(--success); margin: 20px 0;">+ ${totalScore}</div>
-                <button onclick="window.location.href='/leaderboard'" class="btn" style="background: var(--success);">View Global Rankings 🏆</button>
-                <button onclick="location.reload()" class="btn" style="background: var(--primary);">Play Again 🔄</button>
+                
+                <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                    <a href="/leaderboard" class="btn" style="background: var(--success);">View Global Rankings 🏆</a>
+                    <button onclick="location.reload()" class="btn" style="background: var(--primary);">Play Again 🔄</button>
+                    <a href="/logout" style="display:block; margin-top:20px; color:#95a5a6; text-decoration:none; font-size:0.9rem;">Sign Out</a>
+                </div>
             `;
         }
 
         function openRankModal() {
             document.getElementById("rankModal").style.display = "block";
             fetch('/api/leaderboard').then(res => res.json()).then(data => {
-                let html = '<table>';
+                let html = '<table style="width:100%">';
                 data.forEach((p, i) => {
                     html += `<tr><td style="font-weight:bold; color:var(--primary)">#${i+1}</td><td>${p[0]}</td><td style="text-align:right; font-weight:bold; color:var(--success)">${p[1]}</td></tr>`;
                 });
