@@ -1,161 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Python Quiz - Kai.pycourse</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Infinity Quiz</title>
     <style>
-        :root { --primary: #3498db; --success: #2ecc71; --dark: #2c3e50; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 15px; }
-        
-        /* 1. Header Stats Fixed at Top */
-        .header { display: flex; justify-content: space-between; position: fixed; top: 0; left: 0; width: 100%; background: white; padding: 15px 20px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); box-sizing: border-box; }
-        
-        /* 2. Question Box Centering */
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --bg: #f4f7f6;
+            --dark: #2c3e50;
+        }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            display: flex; 
+            justify-content: center; 
+            padding: 20px; 
+            margin: 0;
+        }
         #quiz-box { 
-            margin-top: 100px; 
-            background: white; padding: 25px; border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 450px; 
-            margin-left: auto; margin-right: auto; text-align: center;
+            background: white; 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 500px; 
         }
-
-        /* 3. Trophy Menu Icon */
-        #leaderboard-icon { 
-            position: fixed; top: 105px; right: 20px; z-index: 1001; 
-            background: white; padding: 12px; border-radius: 50%; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.4rem;
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0; 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
         }
-
+        .user-info { font-weight: bold; color: var(--primary); }
+        .stats { font-size: 0.9rem; color: #7f8c8d; }
+        
+        #question-text { font-size: 1.2rem; color: var(--dark); margin-bottom: 20px; min-height: 3em; }
+        
         .option-btn { 
-            display: block; width: 100%; padding: 15px; margin: 10px 0; 
-            border: 2px solid #eee; border-radius: 12px; background: white; 
-            font-size: 1rem; cursor: pointer; transition: 0.3s; 
+            display: block; 
+            width: 100%; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border: 2px solid #eee; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            background: white; 
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            text-align: left;
+            outline: none;
         }
+        .option-btn:hover { border-color: var(--primary); background: #fcfcfc; }
+        .option-btn:disabled { cursor: not-allowed; opacity: 0.8; }
 
-        /* 4. Button Centering Fix */
-        .btn { 
-            display: block; width: 100%; max-width: 280px; padding: 18px; 
-            margin: 15px auto; border: none; border-radius: 12px; 
-            font-weight: bold; font-size: 1.1rem; color: white; 
-            cursor: pointer; text-align: center; text-decoration: none; 
-            box-sizing: border-box;
+        .final-card { text-align: center; padding: 20px 0; }
+        .score-big { font-size: 4rem; font-weight: bold; color: var(--success); margin: 10px 0; }
+        
+        .nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 1rem;
         }
-
-        /* Modal Styles */
-        #rankModal { display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
-        .modal-card { margin: 15% auto; width: 85%; max-width: 360px; background: white; padding: 25px; border-radius: 20px; position: relative; }
-        .leaderboard-scroll { max-height: 350px; overflow-y: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 12px 5px; border-bottom: 1px solid #eee; text-align: left; }
     </style>
 </head>
 <body>
+
+<div id="quiz-box">
     <div class="header">
-        <div style="font-weight: bold; color: var(--primary);">👤 {{ session['user'] }}</div>
-        <div>Q: <span id="q-count">1</span>/10 | Score: <span id="score-val" style="color:var(--success)">0</span></div>
-    </div>
-
-    <div id="leaderboard-icon" onclick="openRankModal()">🏆</div>
-
-    <div id="quiz-box">
-        <div id="game-ui">
-            <h2 id="question-text">Loading Questions...</h2>
-            <div id="options-container"></div>
+        <div class="user-info">👤 {{ username }}</div>
+        <div class="stats">
+            Q: <span id="q-count">0</span>/10 | 
+            Score: <span id="score-val" style="color: var(--success);">0</span>
         </div>
     </div>
-
-    <div id="rankModal">
-        <div class="modal-card">
-            <span onclick="closeRankModal()" style="position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer;">&times;</span>
-            <h2 style="margin-top:0">Top 20 Players</h2>
-            <div id="modal-content" class="leaderboard-scroll"></div>
-        </div>
+    
+    <div id="game-ui">
+        <h3 id="question-text">Loading the challenge...</h3>
+        <div id="options"></div>
     </div>
+</div>
 
-    <script>
-        let questions = [];
-        let currentIdx = 0;
-        let totalScore = 0;
+<script>
+    // 1. RECEIVE RANDOM 10 QUESTIONS FROM FLASK
+    const questions = {{ questions|tojson }};
+    let currentIndex = 0;
+    let totalScore = 0;
 
-        async function loadQuiz() {
-            try {
-                const res = await fetch('/get_questions'); // Link to app.py route
-                questions = await res.json();
-                if (questions.length > 0) {
-                    showQuestion();
-                } else {
-                    document.getElementById('question-text').innerText = "No questions found.";
+    const questionText = document.getElementById('question-text');
+    const optionsDiv = document.getElementById('options');
+    const qCount = document.getElementById('q-count');
+    const scoreVal = document.getElementById('score-val');
+
+    // 2. LOAD THE CURRENT QUESTION
+    function loadQuestion() {
+        if (currentIndex >= questions.length) {
+            finishQuiz();
+            return;
+        }
+
+        const qData = questions[currentIndex];
+        
+        // Update Stats
+        qCount.innerText = (currentIndex + 1);
+        scoreVal.innerText = totalScore;
+        
+        // Set Question Text
+        questionText.innerText = qData.question;
+        
+        // Clear old options and Shuffle current ones
+        optionsDiv.innerHTML = '';
+        let shuffledOptions = [...qData.options].sort(() => Math.random() - 0.5);
+
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(btn, opt, qData.ans);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    // 3. LOGIC FOR CLICKING AN ANSWER
+    function checkAnswer(selectedBtn, choice, correct) {
+        const allButtons = document.querySelectorAll('.option-btn');
+        allButtons.forEach(b => b.disabled = true); // Stop multiple clicks
+
+        if (choice === correct) {
+            selectedBtn.style.background = "var(--success)";
+            selectedBtn.style.color = "white";
+            selectedBtn.style.borderColor = "var(--success)";
+            totalScore += 10;
+        } else {
+            selectedBtn.style.background = "var(--danger)";
+            selectedBtn.style.color = "white";
+            selectedBtn.style.borderColor = "var(--danger)";
+            
+            // Highlight the correct answer so user learns
+            allButtons.forEach(b => {
+                if(b.innerText === correct) {
+                    b.style.borderColor = "var(--success)";
+                    b.style.borderWidth = "3px";
                 }
-            } catch (err) { 
-                document.getElementById('question-text').innerText = "Error loading quiz."; 
-            }
-        }
-
-        function showQuestion() {
-            if (currentIdx >= questions.length) { return finishQuiz(); }
-            const q = questions[currentIdx];
-            document.getElementById('q-count').innerText = currentIdx + 1;
-            document.getElementById('question-text').innerText = q.question;
-            
-            const container = document.getElementById('options-container');
-            container.innerHTML = '';
-            
-            q.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(opt, q.ans, btn);
-                container.appendChild(btn);
             });
         }
 
-        function checkAnswer(choice, correct, btn) {
-            const btns = document.querySelectorAll('.option-btn');
-            btns.forEach(b => b.disabled = true);
-            
-            if (choice === correct) {
-                btn.style.background = '#2ecc71';
-                btn.style.color = 'white';
-                totalScore += 10;
-                document.getElementById('score-val').innerText = totalScore;
-            } else {
-                btn.style.background = '#e74c3c';
-                btn.style.color = 'white';
-            }
-            setTimeout(() => { currentIdx++; showQuestion(); }, 1000);
-        }
+        // Wait 1.5 seconds before next question
+        setTimeout(() => {
+            currentIndex++;
+            loadQuestion();
+        }, 1500);
+    }
 
-        async function finishQuiz() {
-            await fetch('/update_score', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({points: totalScore})
-            });
-            
-            // Result Screen with Centered Buttons
-            document.getElementById('quiz-box').innerHTML = `
-                <h1 style="color: var(--dark); margin-top: 0;">Finished!</h1>
-                <div style="font-size: 3.5rem; font-weight: bold; color: var(--success); margin: 20px 0;">+ ${totalScore}</div>
-                <div style="display: flex; flex-direction: column; align-items: center;">
-                    <a href="/leaderboard" class="btn" style="background: var(--success);">View Rankings 🏆</a>
-                    <button onclick="location.reload()" class="btn" style="background: var(--primary);">Play Again 🔄</button>
-                    <a href="/logout" style="margin-top:20px; color:#95a5a6; text-decoration:none; font-size:0.9rem;">Sign Out</a>
-                </div>
-            `;
-        }
+    // 4. END GAME AND SAVE TO DATABASE
+    async function finishQuiz() {
+        // Save score to Flask via the /save_score route
+        await fetch('/save_score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score: totalScore })
+        });
 
-        function openRankModal() {
-            document.getElementById("rankModal").style.display = "block";
-            fetch('/api/leaderboard').then(res => res.json()).then(data => {
-                let html = '<table>';
-                data.forEach((p, i) => {
-                    html += `<tr><td style="font-weight:bold; color:var(--primary)">#${i+1}</td><td>${p[0]}</td><td style="text-align:right; font-weight:bold; color:var(--success)">${p[1]}</td></tr>`;
-                });
-                document.getElementById("modal-content").innerHTML = html + '</table>';
-            });
-        }
-        function closeRankModal() { document.getElementById("rankModal").style.display = "none"; }
+        // Show Final UI
+        document.getElementById('quiz-box').innerHTML = `
+            <div class="final-card">
+                <h1 style="color: var(--dark);">Quiz Finished!</h1>
+                <p>You earned ⚡</p>
+<div class="score-big">+ ${totalScore} Points</div>
+<p style="font-size: 0.9rem; color: #7f8c8d;">Added to your Global Ranking!</p>
 
-        loadQuiz();
-    </script>
+div>
+                
+                <button onclick="window.location.href='/leaderboard'" class="nav-btn" style="background: var(--success);">
+                    View Global Rankings 🏆
+                </button>
+                
+                <button onclick="location.reload()" class="nav-btn" style="background: var(--primary);">
+                    Try 10 New Questions 🔄
+                </button>
+                
+                <a href="/logout" style="display:block; margin-top:20px; color:#95a5a6; text-decoration:none; font-size:0.8rem;">Change Account</a>
+            </div>
+        `;
+    }
+
+    // Initialize
+    loadQuestion();
+</script>
+
 </body>
 </html>
