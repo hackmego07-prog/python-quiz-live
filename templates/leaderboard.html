@@ -29,7 +29,7 @@
         <tbody>
             {% for name, score in leaderboard %}
             <tr>
-                <td class="rank">#{{ loop.index }}</td>
+                <td class="rank">{{ loop.index }}</td>
                 <td>{{ name }}</td>
                 <td class="score">{{ score }}</td>
             </tr>
