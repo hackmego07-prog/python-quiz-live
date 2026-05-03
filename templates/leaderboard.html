@@ -1,63 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <title>Leaderboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Rankings</title>
     <style>
         body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 20px; }
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        
+        /* 4. The Scrollable Window */
+        .leaderboard-scroll { max-height: 450px; overflow-y: auto; margin-top: 20px; padding-right: 5px; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
-        .rank { font-weight: bold; color: #3498db; }
-        .score { text-align: right; font-weight: bold; color: #2ecc71; }
-        .btn { display: block; width: 100%; padding: 15px; margin-top: 20px; background: #3498db; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; }
-   
-  /* This creates the scrollable window */
-  .leaderboard-scroll {
-      max-height: 450px; 
-      overflow-y: auto;
-      margin-top: 20px;
-      padding-right: 5px;
-  }
-  /* Optional: Makes the scrollbar look slim */
-  .leaderboard-scroll::-webkit-scrollbar {
-      width: 4px;
-  }
-  .leaderboard-scroll::-webkit-scrollbar-thumb {
-      background: #ccc;
-      border-radius: 10px;
-  }
-  
-   </style>
+        
+        /* 5. Center the button exactly */
+        .btn { 
+            display: block; width: 100%; max-width: 280px; 
+            margin: 25px auto; padding: 15px; 
+            background: #3498db; color: white; text-decoration: none; 
+            border-radius: 10px; font-weight: bold; 
+        }
+    </style>
 </head>
 <body>
-<div class="card">
-    <h1>🏆 Global Rankings</h1>
-    
-    <div class="leaderboard-scroll">
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th style="text-align: right;">Total Points ⚡</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for name, score in rankers %}
-                <tr>
-                    <td class="rank">#{{ loop.index }}</td>
-                    <td>{{ name }}</td>
-                    <td class="score">{{ score }}</td>
-                </tr>
-                {% else %}
-                <tr><td colspan="3">No scores yet!</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div> 
-
-    <a href="/quiz" class="btn">Play Again</a>
-</div>
+    <div class="card">
+        <h1>🏆 Global Rankings</h1>
+        <div class="leaderboard-scroll">
+            <table>
+                <thead>
+                    <tr><th>Rank</th><th>Player</th><th style="text-align:right;">Points ⚡</th></tr>
+                </thead>
+                <tbody>
+                    {% for name, score in rankers %}
+                    <tr><td>#{{ loop.index }}</td><td>{{ name }}</td><td style="text-align:right"><b>{{ score }}</b></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="/quiz" class="btn">Play Again</a>
+        <a href="/logout" style="display:block; margin-top:15px; color:#95a5a6; text-decoration:none;">Logout</a>
+    </div>
 </body>
+</html>
