@@ -52,7 +52,6 @@ def api_leaderboard():
     sorted_lb = sorted(lb.items(), key=lambda x: x[1], reverse=True)[:20]
     return jsonify(sorted_lb)
 
-
 @app.route('/update_score', methods=['POST'])
 def update_score():
     if 'user' not in session: return jsonify({"status": "error"})
