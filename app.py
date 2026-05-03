@@ -62,14 +62,6 @@ def update_score():
     save_json(USER_DATA, data)
     return jsonify({"status": "success", "new_total": data['leaderboard'][session['user']]})
 
-@app.route('/leaderboard')
-def leaderboard():
-    data = load_json(USER_DATA, {"leaderboard": {}})
-    lb = data.get("leaderboard", {})
-    # SHOW TOP 20 IN ORDER
-    sorted_lb = sorted(lb.items(), key=lambda x: x[1], reverse=True)[:20]
-    return render_template('leaderboard.html', rankers=sorted_lb)
-
 @app.route('/api/leaderboard')
 def api_leaderboard():
     data = load_json(USER_DATA, {"leaderboard": {}})
