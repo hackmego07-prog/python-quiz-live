@@ -11,37 +11,37 @@
         th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
         .rank { font-weight: bold; color: #3498db; }
         .score { text-align: right; font-weight: bold; color: #2ecc71; }
-        .btn { display: block; width: 100%; padding: 15px; margin-top: 20px; background: #3498db; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; }
+        .btn { display: block; width: 100%; padding: 15px; margin-top: 20px; background: #3498db; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; box-sizing: border-box; }
     </style>
 </head>
 <body>
+    <div class="card">
+        <h1>🏆 Global Rankings</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th style="text-align: right;">Total Points ⚡</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for name, score in leaderboard %}
+                <tr>
+                    <td class="rank">{{ loop.index }}</td>
+                    <td>{{ name }}</td>
+                    <td class="score">{{ score }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3">No scores yet!</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-<div class="card">
-    <h1>🏆 Global Rankings</h1>
-           <table>
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th style="text-align: right;">Total Points ⚡</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for name, score in leaderboard %}
-            <tr>
-                <td class="rank">{{ loop.index }}</td>
-                <td>{{ name }}</td>
-                <td class="score">{{ score }}</td>
-            </tr>
-            {% else %}
-            <tr><td colspan="3">No scores yet!</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-  
-      <a href="/quiz" class="btn">Play Again 🔄</a>
-    <a href="/logout" style="display:block; margin-top:15px; color:#95a5a6; text-decoration:none;">Logout</a>
-</div>
-
+        <div style="margin-top: 25px;">
+            <a href="/quiz" class="btn">Play Again 🔄</a>
+            <a href="/logout" style="display: block; margin-top: 15px; color: #95a5a6; text-decoration: none; font-size: 0.9rem;">Logout</a>
+        </div>
+    </div>
 </body>
 </html>
