@@ -102,5 +102,15 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+# --- ADD THIS CODE HERE ---
+@app.route('/get_questions')
+def get_questions():
+    import random
+    all_qs = load_json('questions.json', [])
+    if not all_qs:
+        return jsonify([])
+    return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
