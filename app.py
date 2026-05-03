@@ -52,6 +52,16 @@ def get_questions():
 
 @app.route('/get_questions')
 def get_questions():
+    # This matches the 'fetch' call in your quiz.html
+    all_qs = load_json(QUESTION_DATA, [])
+    if not all_qs:
+        return jsonify([])
+    # Sends 10 random questions to the frontend
+    return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
+
+
+@app.route('/get_questions')
+def get_questions():
     all_qs = load_json(QUESTION_DATA, [])
     return jsonify(random.sample(all_qs, min(len(all_qs), 10)))
 
