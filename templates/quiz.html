@@ -8,14 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Coding Quiz</title>
       
-     <style>
+    <style>
         :root {
             --primary: #3498db;
             --success: #2ecc71;
             --danger: #e74c3c;
             --bg: #f4f7f6;
-            --dark: #2c3e50;             
-         body { 
+            --dark: #2c3e50;
+        }
+        body { 
             font-family: 'Segoe UI', sans-serif; 
             background: var(--bg); 
             display: flex; 
@@ -44,27 +45,39 @@
         
         #question-text { font-size: 1.2rem; color: var(--dark); margin-bottom: 20px; min-height: 3em; }
         
-        .nav-btn {
-           display: block;
-           width: 100%;
-           padding: 15px;
-           margin-top: 10px;
-           border: none;
-           border-radius: 12px;
-           color: white;
-           background: #3498db; /* ADD THIS          LINE TO MAKE IT BLUE */
-           font-weight: bold;
-           text-decoration: none;
-           cursor: pointer;
-           font-size: 1rem;
-           text-align: center;
+        .option-btn { 
+            display: block; 
+            width: 100%; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border: 2px solid #eee; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            background: white; 
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            text-align: left;
+            outline: none;
         }
-
         .option-btn:hover { border-color: var(--primary); background: #fcfcfc; }
         .option-btn:disabled { cursor: not-allowed; opacity: 0.8; }
 
         .final-card { text-align: center; padding: 20px 0; }
-        .score-big { font-size: 4rem; font-weight: bold; color: var(--success); margin: 10px 0;
+        .score-big { font-size: 4rem; font-weight: bold; color: var(--success); margin: 10px 0; }
+        
+        .nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
