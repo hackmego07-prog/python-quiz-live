@@ -1,54 +1,142 @@
-import json
-import os
-import random
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session, send_from_directory
-from werkzeug.security import generate_password_hash, check_password_hash
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kai.pycourse - Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root { --primary: #3498db; --success: #2ecc71; --error: #e74c3c; --dark: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 15px; }
+        
+        .header { display: flex; justify-content: space-between; position: fixed; top: 0; left: 0; width: 100%; background: white; padding: 15px 20px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); box-sizing: border-box; }
+        
+        #quiz-box { 
+            margin-top: 90px; /* Space for the header */
+            background: white; padding: 25px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 450px; 
+            margin-left: auto; margin-right: auto; text-align: center;
+        }
 
-app = Flask(__name__)
-app.secret_key = 'python_qote_live'
+        #leaderboard-icon { 
+            position: fixed; top: 95px; right: 20px; z-index: 1001; 
+            background: white; padding: 12px; border-radius: 50%; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; font-size: 1.4rem;
+        }
 
-# --- FILE PATHS ---
-USER_DATA = 'users.json'
+        .option-btn { 
+            display: block; width: 100%; padding: 15px; margin: 10px 0; 
+            border: 2px solid #eee; border-radius: 12px; background: white; 
+            font-size: 1rem; cursor: pointer; transition: 0.3s; 
+        }
+        .option-btn:hover { border-color: var(--primary); background: #f0f8ff; }
 
-# --- DATABASE HELPERS ---
-def load_users():
-    if not os.path.exists(USER_DATA):
-        return {"accounts": {}, "leaderboard": {}}
-    with open(USER_DATA, 'r') as f:
-        return json.load(f)
+        .btn { 
+            display: block; width: 100%; padding: 18px; margin-top: 15px; 
+            border: none; border-radius: 12px; font-weight: bold; 
+            font-size: 1.1rem; color: white; cursor: pointer; 
+        }
 
-def save_users(data):
-    with open(USER_DATA, 'w') as f:
-        json.dump(data, f, indent=4)
+        /* Modal / Pop-up Styles */
+        #rankModal { display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-card { margin: 15% auto; width: 85%; max-width: 360px; background: white; padding: 25px; border-radius: 20px; position: relative; }
+        .leaderboard-scroll { max-height: 350px; overflow-y: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 12px 5px; border-bottom: 1px solid #eee; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="font-weight: bold; color: var(--primary);">👤 {{ session['user'] }}</div>
+        <div>Q: <span id="q-count">1</span>/10 | Score: <span id="score-val" style="color:var(--success)">0</span></div>
+    </div>
 
-# --- ROUTES ---
+    <div id="leaderboard-icon" onclick="openRankModal()">🏆</div>
 
-@app.route('/')
-def index():
-    if 'user' in session:
-        return redirect(url_for('quiz'))
-    return redirect(url_for('login'))
+    <div id="quiz-box">
+        <div id="game-ui">
+            <h2 id="question-text">Loading Questions...</h2>
+            <div id="options-container"></div>
+        </div>
+    </div>
 
-# This route handles the main rankings page
-@app.route('/leaderboard')
-def leaderboard():
-    data = load_users()
-    lb_data = data.get("leaderboard", {})
-    sorted_rankers = sorted(lb_data.items(), key=lambda x: x[1], reverse=True)
-    return render_template('leaderboard.html', rankers=sorted_rankers[:20])
+    <div id="rankModal">
+        <div class="modal-card">
+            <span onclick="closeRankModal()" style="position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer;">&times;</span>
+            <h2 style="margin-top:0">Top 20 Global Rankers</h2>
+            <div id="modal-content" class="leaderboard-scroll"></div>
+        </div>
+    </div>
 
-# THIS FIXES THE "LOADING" ISSUE
-@app.route('/api/leaderboard')
-def api_leaderboard():
-    data = load_users()
-    lb = data.get("leaderboard", {})
-    sorted_lb = sorted(lb.items(), key=lambda x: x[1], reverse=True)[:20]
-    return jsonify(sorted_lb)
+    <script>
+        let questions = [];
+        let currentIdx = 0;
+        let totalScore = 0;
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
+        async function loadQuiz() {
+            const res = await fetch('/get_questions');
+            questions = await res.json();
+            showQuestion();
+        }
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+        function showQuestion() {
+            if (currentIdx >= questions.length) { return finishQuiz(); }
+            const q = questions[currentIdx];
+            document.getElementById('q-count').innerText = currentIdx + 1;
+            document.getElementById('question-text').innerText = q.question;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, q.ans, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(choice, correct, btn) {
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(b => b.disabled = true);
+            if (choice === correct) {
+                btn.style.background = '#2ecc71';
+                btn.style.color = 'white';
+                totalScore += 10;
+                document.getElementById('score-val').innerText = totalScore;
+            } else {
+                btn.style.background = '#e74c3c';
+                btn.style.color = 'white';
+            }
+            setTimeout(() => { currentIdx++; showQuestion(); }, 1000);
+        }
+
+        async function finishQuiz() {
+            await fetch('/update_score', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({points: totalScore})
+            });
+            
+            document.getElementById('quiz-box').innerHTML = `
+                <h1 style="color: var(--dark);">Quiz Finished!</h1>
+                <p>You earned</p>
+                <div style="font-size: 3.5rem; font-weight: bold; color: var(--success); margin: 20px 0;">+ ${totalScore}</div>
+                <button onclick="window.location.href='/leaderboard'" class="btn" style="background: var(--success);">View Global Rankings 🏆</button>
+                <button onclick="location.reload()" class="btn" style="background: var(--primary);">Play Again 🔄</button>
+            `;
+        }
+
+        function openRankModal() {
+            document.getElementById("rankModal").style.display = "block";
+            fetch('/api/leaderboard').then(res => res.json()).then(data => {
+                let html = '<table>';
+                data.forEach((p, i) => {
+                    html += `<tr><td style="font-weight:bold; color:var(--primary)">#${i+1}</td><td>${p[0]}</td><td style="text-align:right; font-weight:bold; color:var(--success)">${p[1]}</td></tr>`;
+                });
+                document.getElementById("modal-content").innerHTML = html + '</table>';
+            });
+        }
+        function closeRankModal() { document.getElementById("rankModal").style.display = "none"; }
+
+        loadQuiz();
+    </script>
+</body>
+</html>
